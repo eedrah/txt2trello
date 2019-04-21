@@ -1,53 +1,93 @@
-from trello import TrelloClient
+from trello import TrelloClient, Board, List, Card, Checklist, Label
 import os
 
 class MultipleBoardError(LookupError):
     '''Error when there is more than one board matching that name.'''
 
-class Card():
-    def __init__(self, trello_card):
-        self.trello_card = trello_card
+def Checklist__str__(self):
+    def __str__(self):
+        return '### A checklist exists!!' # Finish when needed
 
-    def print(self):
-        return self.trello_card.name
+Checklist.__str__ = Checklist__str__
 
-class List():
-    def __init__(self, trello_list):
-        self.trello_list = trello_list
-
-    def print(self):
+def Card__str__(self):
+    def str_name(self, fmt):
+        if fmt == 'short':
+            return '## {}'.format(self.name)
         return '\n'.join([
-                self.print_name(),
-                self.print_cards(),
-                ''
+                self.name,
+                '----'
             ])
 
-    def print_cards(self):
-        cards = self.trello_list.list_cards('open')
-        return '\n'.join([Card(card).print() for card in cards])
+    def str_description(self):
+        return self.description
 
-    def print_name(self):
+    def str_checklists(self):
+        return '\n\n'.join([str(checklist) for checklist in self.checklists])
+
+    description = str_description(self)
+    if description:
         return '\n'.join([
-                self.trello_list.name,
+                str_name(self, 'long'),
+                str_description(self),
+                '',
+            ])
+    return str_name(self, 'short')
+
+Card.__str__ = Card__str__
+
+def List__str__(self):
+    def str_cards(self):
+        open_cards = self.list_cards('open')
+        return '\n'.join([str(card) for card in open_cards])
+
+    def str_name(self):
+        return '\n'.join([
+                self.name,
                 '===='
             ])
 
-class Board():
-    def __init__(self, trello_board):
-        self.trello_board = trello_board
+    return '\n'.join([
+            str_name(self),
+            str_cards(self),
+            ''
+        ])
 
-    def print(self):
-        return '\n'.join([
-                self.print_name(),
-                self.print_lists(),
-            ])
+List.__str__ = List__str__
 
-    def print_lists(self):
-        lists = self.trello_board.get_lists('open')
-        return '\n'.join([List(list).print() for list in lists])
+class Labels():
+    def __init__(self, labels):
+        self.labels = labels
 
-    def print_name(self):
-        return self.trello_board.name
+    def __str__(self):
+        str_labels = ['- ({}) {}'.format(label.color,label.name) for label in self.labels if label.name]
+        if str_labels:
+            return '\n'.join([
+                    'Labels',
+                    '----',
+                    *str_labels,
+                    '',
+                ])
+        return ''
+
+def Board__str__(self):
+    def str_lists(self):
+        open_lists = self.get_lists('open')
+        return '\n'.join([str(list) for list in open_lists])
+
+    def str_name(self):
+        return self.name
+
+    def str_labels(self):
+        return str(Labels(self.get_labels()))
+
+    return '\n'.join([
+            str_name(self),
+            str_labels(self),
+            str_lists(self),
+        ])
+
+Board.__str__ = Board__str__
 
 def main():
     api_key = os.environ['API_KEY'],
@@ -63,8 +103,8 @@ def main():
     matching_boards = [x for x in client.list_boards('open') if x.name == 'trello2txt']
     if len(matching_boards) > 1:
         raise MultipleBoardError('There is more than one board with that name.')
-    board = Board(matching_boards[0])
-    print(board.print())
+    board = (matching_boards[0])
+    print(str(board))
 
 if __name__ == '__main__':
     main()
