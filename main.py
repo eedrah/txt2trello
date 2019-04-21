@@ -11,9 +11,7 @@ def Checklist__str__(self):
 Checklist.__str__ = Checklist__str__
 
 def Card__str__(self):
-    def str_name(self, fmt):
-        if fmt == 'short':
-            return '## {}'.format(self.name)
+    def str_name(self):
         return '\n'.join([
                 self.name,
                 '----'
@@ -28,11 +26,11 @@ def Card__str__(self):
     description = str_description(self)
     if description:
         return '\n'.join([
-                str_name(self, 'long'),
+                str_name(self),
                 str_description(self),
                 '',
             ])
-    return str_name(self, 'short')
+    return str_name(self)
 
 Card.__str__ = Card__str__
 
